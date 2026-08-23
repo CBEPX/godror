@@ -95,7 +95,12 @@ func Main() error {
 					}
 				}
 				if err != nil {
-					return fmt.Errorf("exec %s: %w", qry, err)
+					var oerr interface{ Code() int }
+					if errors.As(err, &oerr) && oerr.Code() == 1400 { // cannot insert NULL {
+						log.Printf("WARN: %s: %+v", qry, err)
+					} else {
+						return fmt.Errorf("exec %s: %w", qry, err)
+					}
 				}
 				return nil
 			})
